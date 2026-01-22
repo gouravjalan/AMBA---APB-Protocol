@@ -1,0 +1,60 @@
+//testbench for apb master and slave;
+
+module apb_tb_slave;
+
+reg clk,rst;
+reg transfer;
+reg write;
+reg [31:0] addr;
+reg [31:0] wdata;
+
+
+wire psel;
+wire pready;
+wire [31:0] paddr;
+wire [31:0] pwdata;
+wire penable;
+wire pwrite;
+
+
+apb_mst dut(clk, rst, transfer, addr, wdata, write, psel, pwdata, paddr, pwrite, penable, pready);
+
+initial begin
+	{clk,rst,transfer,addr,write,wdata} = 0;
+
+end
+
+always #5 clk = ~clk;
+
+
+initial begin
+	rst = 0;
+	write = 1;
+	pready = 0;
+
+	#20;
+	
+	rst = 1;
+
+	@(posedge clk);
+	transfer = 1;
+	addr = 32'habcd_1234;
+	wdata = 32'hface_cafe
+	write = 1;
+
+	@(posedge clk);
+	transfer = 0;
+
+	repeat(3)
+	   @(posedge clk);
+
+	pready = 1;
+
+	@(posedge clk);
+	pready = 0;
+
+	#50;
+	$finish;
+
+end
+endmodule
